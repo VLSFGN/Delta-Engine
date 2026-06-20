@@ -1,50 +1,35 @@
 #include <glad/glad.h>
 #include <GLFW/glfw3.h>
 #include <iostream>
+
+#define DEBUG
+
 #include "renderer/ShaderProgram.hpp"
+#include "renderer/ResourceManager.hpp"
 
 #define N 9
 
 GLfloat point[N] = {
     0.0f, 0.5f, 0.0f,
     0.5f, -0.5f, 0.0f,
-    -0.5f, -0.5f, 0.0f
-};
+    -0.5f, -0.5f, 0.0f};
 GLfloat colors[N] = {
     1.0f, 0.0f, 0.0f,
     0.0f, 1.0f, 0.0f,
-    0.0f, 0.0f, 1.0f
-};
+    0.0f, 0.0f, 1.0f};
 
 int gWindowWidth = 640;
 int gWindowHeight = 480;
 
-const char *vertex_shader = 
-"#version 460\n"
-"layout(location = 0) in vec3 vertex_position;"
-"layout(location = 1) in vec3 vertex_color;"
-"out vec3 color;"
-"void main(){"
-"   color = vertex_color;"
-"   gl_Position = vec4(vertex_position, 1.0);"
-"}";
 
-const char *fragment_shader = 
-"#version 460\n"
-"in vec3 color;"
-"out vec4 frag_color;"
-"void main(){"
-"   frag_color = vec4(color, 1.0);"
-"}";
-
-void glfwWindowSizeCallBack(GLFWwindow* pWindow, int width, int height)
+void glfwWindowSizeCallBack(GLFWwindow *pWindow, int width, int height)
 {
     gWindowHeight = height;
     gWindowWidth = width;
     glViewport(0, 0, gWindowWidth, gWindowHeight);
 }
 
-void glfwKeyCallback(GLFWwindow* pWindow, int key, int scancode, int action, int mode)
+void glfwKeyCallback(GLFWwindow *pWindow, int key, int scancode, int action, int mode)
 {
     if (key == GLFW_KEY_ESCAPE && action == GLFW_PRESS)
     {
@@ -68,9 +53,10 @@ void vertexAttrArray(int index, GLuint _vbo)
     glVertexAttribPointer(index, 3, GL_FLOAT, GL_FALSE, 0, nullptr);
 }
 
-
-int main(void)
+int main(int argc, char *argv[])
 {
+    rnd::ResourceManager &manager = rnd::ResourceManager::getResourceManager(argv[0]);
+
     const char *engine_name = "Delta";
     const char *title_name = "Test1";
 
@@ -78,14 +64,15 @@ int main(void)
     glfwWindowHint(GLFW_CONTEXT_VERSION_MINOR, 6);
     glfwWindowHint(GLFW_OPENGL_PROFILE, GLFW_OPENGL_CORE_PROFILE);
 
-    GLFWwindow* window;
+    GLFWwindow *window;
 
     /* Initialize the library */
     if (!glfwInit())
         return -1;
 
     /* Create a windowed mode window and its OpenGL context */
-    window = glfwCreateWindow(gWindowWidth, gWindowHeight, title_name, NULL, NULL);;
+    window = glfwCreateWindow(gWindowWidth, gWindowHeight, title_name, NULL, NULL);
+    ;
     if (!window)
     {
         glfwTerminate();
@@ -97,7 +84,7 @@ int main(void)
 
     /* Make the window's context current */
     glfwMakeContextCurrent(window);
-    
+
     if (!gladLoadGL())
     {
         std::cout << "Can't load GLAD" << std::endl;
@@ -107,45 +94,51 @@ int main(void)
     std::cout << "Renderer: " << glGetString(GL_RENDERER) << std::endl;
     std::cout << "OpenGL Version: " << glGetString(GL_VERSION) << std::endl;
 
-
-    glClearColor(1,1,1,1);
-
-    rnd::ShaderProgram s_prog(vertex_shader, fragment_shader);
-
-    if(!s_prog.isCompiled()) {
-        std::cerr << "Can't create shader programm!" << std::endl;
-        return -1;
-    }
-
-    GLuint points_vbo = vbo(point);
-    GLuint colors_vbo = vbo(colors);
-
-    GLuint vao = 0;
-
-    glGenVertexArrays(1, &vao);
-    glBindVertexArray(vao);
-
-    vertexAttrArray(0, points_vbo);
-    vertexAttrArray(1, colors_vbo);
-
-    /* Loop until the user closes the window */
-    while (!glfwWindowShouldClose(window))
     {
-        /* Render here */
-        glClear(GL_COLOR_BUFFER_BIT);
+        glClearColor(1, 1, 1, 1);
 
-        s_prog.use();
+        auto pDefShaderProgram = manager.load("DefaultShader", "data/shaders/vertex.txt", "data/shaders/fragment.txt");
+        if (!pDefShaderProgram)
+        {
+            std::cerr << "Can't create shader program!\n";
+            return -1;
+        }
+
+        if (!pDefShaderProgram->isCompiled())
+        {
+            std::cerr << "Can't create shader programm!" << std::endl;
+            return -1;
+        }
+
+        GLuint points_vbo = vbo(point);
+        GLuint colors_vbo = vbo(colors);
+
+        GLuint vao = 0;
+
+        glGenVertexArrays(1, &vao);
         glBindVertexArray(vao);
 
-        glDrawArrays(GL_TRIANGLES, 0, 3);
+        vertexAttrArray(0, points_vbo);
+        vertexAttrArray(1, colors_vbo);
 
-        /* Swap front and back buffers */
-        glfwSwapBuffers(window);
+        /* Loop until the user closes the window */
+        while (!glfwWindowShouldClose(window))
+        {
+            /* Render here */
+            glClear(GL_COLOR_BUFFER_BIT);
 
-        /* Poll for and process events */
-        glfwPollEvents();
+            pDefShaderProgram->use();
+            glBindVertexArray(vao);
+
+            glDrawArrays(GL_TRIANGLES, 0, 3);
+
+            /* Swap front and back buffers */
+            glfwSwapBuffers(window);
+
+            /* Poll for and process events */
+            glfwPollEvents();
+        }
     }
-
     glfwTerminate();
     return 0;
 }

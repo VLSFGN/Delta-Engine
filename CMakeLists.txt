@@ -25,8 +25,8 @@ set(CMAKE_CXX_FLAGS_RELEASE "-O2 -DNDEBUG -s" CACHE STRING "C++ Release flags" F
 add_executable(${MY_GLOBAL_PROJECT_NAME} 
     src/main.cpp
     #ext/glad/src/glad.c
-    src/renderer/ShaderProgram.hpp
     src/renderer/ShaderProgram.cpp
+    src/renderer/ResourceManager.cpp
 )
 
 set(GLFW_BUILD_DOCS OFF CACHE INTERNAL "Build GLFW documentation")
@@ -53,6 +53,7 @@ set_target_properties(${MY_GLOBAL_PROJECT_NAME} PROPERTIES
     RUNTIME_OUTPUT_DIRECTORY_RELWITHDEBINFO ${CMAKE_BINARY_DIR}/bin
     RUNTIME_OUTPUT_DIRECTORY ${CMAKE_BINARY_DIR}/bin/
 )
-add_custom_command(TARGET ${MY_GLOBAL_PROJECT_NAME}  POST_BUILD
+add_custom_command(TARGET ${MY_GLOBAL_PROJECT_NAME} POST_BUILD
     COMMAND ${CMAKE_COMMAND} -E copy_directory
-    ${CMAKE_SOURCE_DIR}/src/data $<TARGET_FILE_DIR:${MY_GLOBAL_PROJECT_NAME}>)
+    ${CMAKE_SOURCE_DIR}/src/data $<TARGET_FILE_DIR:${MY_GLOBAL_PROJECT_NAME}>/data
+)
