@@ -4,8 +4,8 @@
 
 #define DEBUG
 
-#include "renderer/ShaderProgram.hpp"
-#include "renderer/ResourceManager.hpp"
+#include "render/objects/shaders/shader_program.hpp"
+#include "render/resource_manager.hpp"
 
 #define N 9
 
@@ -55,9 +55,8 @@ void vertexAttrArray(int index, GLuint _vbo)
 
 int main(int argc, char *argv[])
 {
-    rnd::ResourceManager &manager = rnd::ResourceManager::getResourceManager(argv[0]);
+    rnd::ResourceManager *manager = rnd::ResourceManager::getResourceManager(argv[0]);
 
-    const char *engine_name = "Delta";
     const char *title_name = "Test1";
 
     glfwWindowHint(GLFW_CONTEXT_VERSION_MAJOR, 4);
@@ -97,7 +96,7 @@ int main(int argc, char *argv[])
     {
         glClearColor(1, 1, 1, 1);
 
-        auto pDefShaderProgram = manager.load("DefaultShader", "data/shaders/vertex.txt", "data/shaders/fragment.txt");
+        auto pDefShaderProgram = manager->load("DefaultShader", "data/shaders/vertex.txt", "data/shaders/fragment.txt");
         if (!pDefShaderProgram)
         {
             std::cerr << "Can't create shader program!\n";

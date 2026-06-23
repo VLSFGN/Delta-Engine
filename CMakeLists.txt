@@ -25,8 +25,8 @@ set(CMAKE_CXX_FLAGS_RELEASE "-O2 -DNDEBUG -s" CACHE STRING "C++ Release flags" F
 add_executable(${MY_GLOBAL_PROJECT_NAME} 
     src/main.cpp
     #ext/glad/src/glad.c
-    src/renderer/ShaderProgram.cpp
-    src/renderer/ResourceManager.cpp
+    src/render/objects/shaders/shader_program.cpp
+    src/render/resource_manager.cpp
 )
 
 set(GLFW_BUILD_DOCS OFF CACHE INTERNAL "Build GLFW documentation")
