@@ -1,9 +1,9 @@
 #include <glad/glad.h>
 #include <GLFW/glfw3.h>
-#include <iostream>
 
 #define DEBUG
 
+#include "log/logger.hpp"
 #include "render/objects/shaders/shader_program.hpp"
 #include "render/resource_manager.hpp"
 
@@ -53,9 +53,13 @@ void vertexAttrArray(int index, GLuint _vbo)
     glVertexAttribPointer(index, 3, GL_FLOAT, GL_FALSE, 0, nullptr);
 }
 
+
 int main(int argc, char *argv[])
 {
-    rnd::ResourceManager *manager = rnd::ResourceManager::getResourceManager(argv[0]);
+    auto manager = rnd::ResourceManager::getResourceManager(argv[0]);
+    auto logger = Logger::getLogger();
+
+    logger->set_minlivel(LOG_LEVEL_DEBUG);
 
     const char *title_name = "Test1";
 
@@ -66,8 +70,10 @@ int main(int argc, char *argv[])
     GLFWwindow *window;
 
     /* Initialize the library */
-    if (!glfwInit())
+    if (!glfwInit()) {
+        logger->clog(LOG_LEVEL_ERROR, "Can't create shader programm!");
         return -1;
+    }
 
     /* Create a windowed mode window and its OpenGL context */
     window = glfwCreateWindow(gWindowWidth, gWindowHeight, title_name, NULL, NULL);
@@ -75,6 +81,7 @@ int main(int argc, char *argv[])
     if (!window)
     {
         glfwTerminate();
+        logger->clog(LOG_LEVEL_ERROR, "Can't create Window!");
         return -1;
     }
 
@@ -86,12 +93,12 @@ int main(int argc, char *argv[])
 
     if (!gladLoadGL())
     {
-        std::cout << "Can't load GLAD" << std::endl;
+        logger->clog(LOG_LEVEL_ERROR, "Can't load Glad!");
         return -1;
     }
 
-    std::cout << "Renderer: " << glGetString(GL_RENDERER) << std::endl;
-    std::cout << "OpenGL Version: " << glGetString(GL_VERSION) << std::endl;
+    logger->clog(LOG_LEVEL_INFO, "Renderer: %s", glGetString(GL_RENDERER));
+    logger->clog(LOG_LEVEL_INFO, "OpenGL Version: %s", glGetString(GL_VERSION));
 
     {
         glClearColor(1, 1, 1, 1);
@@ -99,13 +106,13 @@ int main(int argc, char *argv[])
         auto pDefShaderProgram = manager->load("DefaultShader", "data/shaders/vertex.txt", "data/shaders/fragment.txt");
         if (!pDefShaderProgram)
         {
-            std::cerr << "Can't create shader program!\n";
+            logger->clog(LOG_LEVEL_ERROR, "Can't create shader programm!");
             return -1;
         }
 
         if (!pDefShaderProgram->isCompiled())
         {
-            std::cerr << "Can't create shader programm!" << std::endl;
+            logger->clog(LOG_LEVEL_ERROR, "Can't create shader programm!");
             return -1;
         }
 
@@ -119,6 +126,7 @@ int main(int argc, char *argv[])
 
         vertexAttrArray(0, points_vbo);
         vertexAttrArray(1, colors_vbo);
+        
 
         /* Loop until the user closes the window */
         while (!glfwWindowShouldClose(window))

@@ -27,6 +27,7 @@ add_executable(${MY_GLOBAL_PROJECT_NAME}
     #ext/glad/src/glad.c
     src/render/objects/shaders/shader_program.cpp
     src/render/resource_manager.cpp
+    src/log/logger.cpp
 )
 
 set(GLFW_BUILD_DOCS OFF CACHE INTERNAL "Build GLFW documentation")

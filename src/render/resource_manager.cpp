@@ -1,16 +1,17 @@
+#include "../log/logger.hpp"
+
 #include "resource_manager.hpp"
 #include "objects/shaders/shader_program.hpp"
 
 #include <sstream>
 #include <fstream>
-#include <iostream>
 
 
 static bool __shaderLoadTest__(const std::string &__shaderStr, const char *message)
 {
     if (__shaderStr.empty())
     {
-        std::cerr << message << " shader is no load!" << std::endl;
+        Logger::getLogger()->clog(LOG_LEVEL_ERROR, "%s shader is no load!", message);
         return false;
     }
     return true;
@@ -31,7 +32,7 @@ std::string rnd::ResourceManager::__get_file_string__(const std::string &relativ
 
     if (!iFile.is_open())
     {
-        std::cerr << "Failed to open file: " << relative_path << std::endl;
+        Logger::getLogger()->clog(LOG_LEVEL_ERROR, "Failed to open file: %s", relative_path);
         return std::string{};
     }
 
@@ -56,9 +57,10 @@ rnd::ResourceManager::shader_ptr_t rnd::ResourceManager::__load_shader__(
     if (shader_prog->isCompiled())
         return shader_prog;
 
-    std::cerr << "Can't load shader program:\n" << 
-        "Vertex: " << vshader << ";\n" <<
-        "Fragment: " << fshader << ";\n";
+    Logger::getLogger()->clog(LOG_LEVEL_ERROR, 
+        "Can't load shader program:\n"
+        "Vertex: %s\n"
+        "vshader %s\n", vshader, fshader);
 
     return nullptr;
 }
@@ -94,7 +96,7 @@ rnd::ResourceManager::shader_ptr_t rnd::ResourceManager::get_shader(const std::s
 
     if (it != this->__shader_container.end()) return it->second;
 
-    std::cerr << "Can't find shader program: " << shader_name << "\n";
+    Logger::getLogger()->clog(LOG_LEVEL_ERROR, "Can't find shader program: %s", shader_name);
 
     return nullptr;
 }

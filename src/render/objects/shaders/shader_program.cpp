@@ -1,8 +1,5 @@
-#include <iostream>
+#include "../../../log/logger.hpp"
 #include "shader_program.hpp"
-
-
-#define DEBUG
 
 
 using funcIv_t = PFNGLGETSHADERIVPROC;
@@ -28,7 +25,7 @@ static bool __shaderErrorTest__(
         
         func_info_log(shader_id, SIZE_BUFFER, nullptr, infoLog);
 
-        std::cerr << "ERROR::SHADER: " << warning << " time error:\n" << infoLog << std::endl;
+        Logger::getLogger()->clog(LOG_LEVEL_ERROR, "ERROR::SHADER: %s time error: %s\n", warning, infoLog);
     }
     return static_cast<bool>(success);
 }
@@ -69,14 +66,14 @@ rnd::ShaderProgram::ShaderProgram(const char *vshader_path, const char *fshader_
     GLuint vshader_id;
     if (!createShader(vshader_path, GL_VERTEX_SHADER, vshader_id))
     {
-        std::cerr << "VERTEX::SHADER compile time error" << std::endl;
+        Logger::getLogger()->clog(LOG_LEVEL_ERROR, "VERTEX::SHADER compile time error");
         return;
     }
 
     GLuint fshader_id;
     if (!createShader(fshader_path, GL_FRAGMENT_SHADER, fshader_id))
     {
-        std::cerr << "FRAGMENT::SHADER compile time error" << std::endl;
+        Logger::getLogger()->clog(LOG_LEVEL_ERROR, "FRAGMENT::SHADER compile time error");
         glDeleteShader(vshader_id);
         return;
     }
